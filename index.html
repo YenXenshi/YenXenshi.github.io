@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSPS Toplist — Free RuneScape Private Server Rankings</title>
+  <meta name="description" content="A free, auto-updated directory of RuneScape private servers (RSPS). Filter by type, era, and client. Vote for your favorite and claim in-game rewards." />
+  <link rel="stylesheet" href="style.css" />
+  <!--
+    AdSense setup:
+    1. Sign up at https://www.google.com/adsense (free) and get your site approved.
+    2. Paste your AdSense <script> snippet here in <head>, replacing this comment.
+    3. Replace each .ad-slot div below with your <ins class="adsbygoogle"> unit.
+  -->
+</head>
+<body>
+  <header>
+    <h1>RSPS Toplist</h1>
+    <p>Free, auto-updated directory of RuneScape private servers.</p>
+  </header>
+
+  <main>
+    <div class="ad-slot">Ad slot (top banner) — paste your AdSense unit here</div>
+
+    <p style="text-align:center; color: var(--muted);">
+      Want your server listed? <a href="https://github.com/YenXenshi/YenXenshi.github.io/issues/new?template=submit-server.md" style="color: var(--accent);">Submit it free</a>
+      — or ask about a <strong>Featured</strong> slot for extra visibility.
+    </p>
+
+    <div class="filters">
+      <select id="filter-type">
+        <option value="">All types</option>
+      </select>
+      <select id="filter-client">
+        <option value="">All clients</option>
+      </select>
+      <input id="filter-era" type="text" placeholder="Search era/revision..." />
+    </div>
+
+    <div id="server-list"></div>
+
+    <div class="ad-slot">Ad slot (bottom banner) — paste your AdSense unit here</div>
+  </main>
+
+  <footer>
+    <p>Status checked automatically once a day. Featured listings are paid placements and are disclosed as such.</p>
+    <p>Server owners: contact us to get featured — see the README for pricing.</p>
+  </footer>
+
+  <script>
+    // Set this once the Cloudflare Worker backend is deployed (see worker/README.md).
+    // Leave blank to hide voting until then.
+    const VOTE_API_BASE = "https://rsps-toplist-votes.thatssodavidggl.workers.dev";
+
+    let allServers = [];
+    let voteCounts = {};
+
+    async function loadServers() {
+      const container = document.getElementById("server-list");
+      try {
+        const res = await fetch("servers.json", { cache: "no-store" });
+        const data = await res.json();
+        allServers = data.servers;
+
+        if (VOTE_API_BASE) {
+          try {
+            const countsRes = await fetch(`${VOTE_API_BASE}/api/vote-counts`, { cache: "no-store" });
+            voteCounts = await countsRes.json();
+          } catch {
+            voteCounts = {};
+          }
+        }
+
+        populateFilterOptions();
+        renderList();
+      } catch (err) {
+        container.innerHTML = "<p style='color:var(--muted)'>Could not load server list.</p>";
+      }
+    }
+
+    function populateFilterOptions() {
+      const typeSelect = document.getElementById("filter-type");
+      const clientSelect = document.getElementById("filter-client");
+
+      const types = [...new Set(allServers.map((s) => s.type).filter(Boolean))].sort();
+      const clients = [...new Set(allServers.map((s) => s.client).filter(Boolean))].sort();
+
+      for (const t of types) {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t.toUpperCase();
+        typeSelect.appendChild(opt);
+      }
+      for (const c of clients) {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        clientSelect.appendChild(opt);
+      }
+    }
+
+    function renderList() {
+      const container = document.getElementById("server-list");
+      const typeFilter = document.getElementById("filter-type").value;
+      const clientFilter = document.getElementById("filter-client").value;
+      const eraFilter = document.getElementById("filter-era").value.trim().toLowerCase();
+
+      const filtered = allServers.filter((s) => {
+        if (typeFilter && s.type !== typeFilter) return false;
+        if (clientFilter && s.client !== clientFilter) return false;
+        if (eraFilter && !(s.era || s.revision || "").toLowerCase().includes(eraFilter)) return false;
+        return true;
+      });
+
+      const sorted = [...filtered].sort((a, b) => {
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      container.innerHTML = sorted.length
+        ? sorted.map(renderCard).join("")
+        : "<p style='color:var(--muted); text-align:center;'>No servers match those filters.</p>";
+    }
+
+    function renderCard(server) {
+      const statusClass = server.status === "online" ? "online" : "offline";
+      const featuredBadge = server.featured
+        ? '<span class="badge featured">Featured</span>'
+        : "";
+      const votes = voteCounts[server.slug] || 0;
+      const voteButton = VOTE_API_BASE
+        ? `<a class="vote-btn" href="${VOTE_API_BASE}/vote?server=${encodeURIComponent(server.slug)}" target="_blank" rel="noopener">Vote (${votes})</a>`
+        : "";
+      return `
+        <div class="server-card ${server.featured ? "featured" : ""}">
+          <div class="server-info">
+            <h3>${escapeHtml(server.name)} ${featuredBadge}</h3>
+            <p>${escapeHtml(server.era || server.revision || "")} — ${escapeHtml(server.client || "")}</p>
+            <p>${escapeHtml(server.description || "")}</p>
+            <a class="connect-link" href="${escapeAttr(server.website)}" target="_blank" rel="noopener">${escapeHtml(server.website)}</a>
+          </div>
+          <div class="status">
+            <span class="dot ${statusClass}"></span>
+            ${server.status === "online" ? "Online" : "Offline"}
+            ${voteButton}
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+
+    document.getElementById("filter-type").addEventListener("change", renderList);
+    document.getElementById("filter-client").addEventListener("change", renderList);
+    document.getElementById("filter-era").addEventListener("input", renderList);
+
+    loadServers();
+  </script>
+</body>
+</html>

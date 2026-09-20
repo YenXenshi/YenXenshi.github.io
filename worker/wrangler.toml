@@ -1,0 +1,7 @@
+name = "rsps-toplist-votes"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+kv_namespaces = [
+  { binding = "VOTES", id = "076451e378e0495b88e9beb43fb6fcec" }
+]
