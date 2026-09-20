@@ -2,28 +2,36 @@
   "servers": [
     {
       "id": "example-server-1",
-      "name": "Example RSPS (placeholder \u2014 replace via Issue submission)",
+      "slug": "example-server-1",
+      "name": "Example RSPS (placeholder — replace via Issue submission)",
       "website": "https://example.com",
       "connect": "play.example.com:43594",
+      "type": "osrs",
+      "era": "2007-era (OSRS #200-ish)",
+      "client": "Custom client",
       "revision": "OSRS #200-ish",
       "description": "Placeholder entry. Real listings are added when a server owner opens a 'Submit Server' issue.",
       "discord": "",
       "featured": false,
-      "status": "offline",
-      "last_checked": "2026-09-20T11:56:14+00:00",
+      "status": "unknown",
+      "last_checked": null,
       "submitted_by": "seed-data"
     },
     {
       "id": "example-server-2",
+      "slug": "example-server-2",
       "name": "Featured Example RSPS (placeholder)",
       "website": "https://example.org",
       "connect": "play.example.org:43594",
+      "type": "rs3",
+      "era": "Modern RS3-based",
+      "client": "RuneLite-based",
       "revision": "RS3-based custom",
       "description": "Placeholder for a paid 'Featured' slot. Featured servers are pinned to the top and highlighted.",
       "discord": "",
       "featured": true,
-      "status": "offline",
-      "last_checked": "2026-09-20T11:56:14+00:00",
+      "status": "unknown",
+      "last_checked": null,
       "submitted_by": "seed-data"
     }
   ]

@@ -25,12 +25,23 @@ distribute, or modify any RSPS game software itself.
    hosting providers that run referral programs, or a "verify/bump" fee for
    owners who want their listing refreshed more often.
 
+## Vote & Rewards
+
+Visitors can vote for their favorite server; players can then claim an
+in-game reward the server owner sets up themselves. This needs a small free
+backend (Cloudflare Workers) since GitHub Pages is static-only — see
+`worker/README.md` for the one-time setup and how server owners integrate
+the claim command on their end. Until that backend is deployed and
+`VOTE_API_BASE` in `index.html` is set, the Vote buttons stay hidden.
+
 ## How submissions work
 
 Server owners open a **Submit Server** issue (template auto-loads the
-required fields: name, website, connect info, revision, description). Add
-their entry to `servers.json` to publish it — no code changes needed beyond
-that JSON file.
+required fields: name, website, connect info, type, era/revision, client,
+description, and whether they want the Vote & Rewards integration). Add
+their entry to `servers.json` (with a unique `slug`) to publish it — no
+other code changes needed. Visitors can filter the list by type, client,
+and era/revision search.
 
 ## Automation
 

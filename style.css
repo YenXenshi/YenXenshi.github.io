@@ -122,6 +122,40 @@ main {
   font-size: 13px;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.filters select,
+.filters input {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.filters input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.vote-btn {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #1a1300;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 footer {
   text-align: center;
   color: var(--muted);
