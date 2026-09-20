@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSPS Toplist — Free RuneScape Private Server Rankings</title>
+  <meta name="description" content="A free, auto-updated directory of RuneScape private servers (RSPS). Submit your server for free, or get featured for more visibility." />
+  <link rel="stylesheet" href="style.css" />
+  <!--
+    AdSense setup:
+    1. Sign up at https://www.google.com/adsense (free) and get your site approved.
+    2. Paste your AdSense <script> snippet here in <head>, replacing this comment.
+    3. Replace each .ad-slot div below with your <ins class="adsbygoogle"> unit.
+  -->
+</head>
+<body>
+  <header>
+    <h1>RSPS Toplist</h1>
+    <p>Free, auto-updated directory of RuneScape private servers.</p>
+  </header>
+
+  <main>
+    <div class="ad-slot">Ad slot (top banner) — paste your AdSense unit here</div>
+
+    <p style="text-align:center; color: var(--muted);">
+      Want your server listed? <a href="https://github.com/YenXenshi/YenXenshi.github.io/issues/new?template=submit-server.md" style="color: var(--accent);">Submit it free</a>
+      — or ask about a <strong>Featured</strong> slot for extra visibility.
+    </p>
+
+    <div id="server-list"></div>
+
+    <div class="ad-slot">Ad slot (bottom banner) — paste your AdSense unit here</div>
+  </main>
+
+  <footer>
+    <p>Status checked automatically once a day. Featured listings are paid placements and are disclosed as such.</p>
+    <p>Server owners: contact us to get featured — see the README for pricing.</p>
+  </footer>
+
+  <script>
+    async function loadServers() {
+      const container = document.getElementById("server-list");
+      try {
+        const res = await fetch("servers.json", { cache: "no-store" });
+        const data = await res.json();
+        const servers = [...data.servers].sort((a, b) => {
+          if (a.featured !== b.featured) return a.featured ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        container.innerHTML = servers.map(renderCard).join("");
+      } catch (err) {
+        container.innerHTML = "<p style='color:var(--muted)'>Could not load server list.</p>";
+      }
+    }
+
+    function renderCard(server) {
+      const statusClass = server.status === "online" ? "online" : "offline";
+      const featuredBadge = server.featured
+        ? '<span class="badge featured">Featured</span>'
+        : "";
+      return `
+        <div class="server-card ${server.featured ? "featured" : ""}">
+          <div class="server-info">
+            <h3>${escapeHtml(server.name)} ${featuredBadge}</h3>
+            <p>${escapeHtml(server.revision || "")} — ${escapeHtml(server.description || "")}</p>
+            <a class="connect-link" href="${escapeAttr(server.website)}" target="_blank" rel="noopener">${escapeHtml(server.website)}</a>
+          </div>
+          <div class="status">
+            <span class="dot ${statusClass}"></span>
+            ${server.status === "online" ? "Online" : "Offline"}
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+
+    loadServers();
+  </script>
+</body>
+</html>
